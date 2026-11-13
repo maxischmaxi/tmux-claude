@@ -95,6 +95,7 @@ set -ag status-right "#(~/.tmux/plugins/tmux-claude/bin/tmux-claude status)"
 | key | action |
 |---|---|
 | `prefix + A` | toggle the sidebar |
+| `@claude-sidebar-root-key` | toggle without prefix, if configured |
 | click, `enter`, `l`, `space` | jump to the selected instance |
 | `1` – `9` | jump to instance n |
 | `j` / `k`, mouse wheel | move the selection |
@@ -108,8 +109,11 @@ The selected entry also shows the last prompt sent to that instance. An instance
 
 ## Options
 
+Set options before the plugin is loaded (before the tpm `run` line).
+
 ```tmux
-set -g @claude-sidebar-key 'A'      # toggle key (after prefix)
+set -g @claude-sidebar-key 'A'      # toggle key after prefix, 'none' to disable
+set -g @claude-sidebar-root-key 'M-s' # toggle key without prefix (unset by default)
 set -g @claude-sidebar-width 34     # sidebar width in columns
 ```
 
