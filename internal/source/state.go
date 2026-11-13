@@ -38,21 +38,29 @@ func coarse(cs *ClaudeSession, hs *HookState) (string, int64) {
 	if cs != nil && cs.Status != "" {
 		st, since = cs.Status, cs.StatusUpdatedAt
 	}
-	if hs != nil && (st == "" || hs.TS > since) {
-		hst := ""
-		switch hs.Event {
-		case "Notification":
-			if isPermission(hs.Notification) {
-				hst = "waiting"
-			}
-		case "Stop", "SessionStart":
-			hst = "idle"
-		case "UserPromptSubmit", "PreToolUse", "PostToolUse", "SubagentStop":
-			hst = "busy"
+	if hs == nil || (st != "" && hs.TS <= since) {
+		return st, since
+	}
+	hst := ""
+	switch hs.Event {
+	case "Notification":
+		if isPermission(hs.Notification) {
+			hst = "waiting"
 		}
-		if hst != "" && (st == "" || hst != st) {
-			st, since = hst, hs.TS
-		}
+	case "Stop", "SessionStart":
+		hst = "idle"
+	case "UserPromptSubmit", "PreToolUse", "PostToolUse", "SubagentStop":
+		hst = "busy"
+	}
+	// claude's own status wins; a newer hook may only report that a busy
+	// session stopped or waits. Stop does not fire on interrupts, and late
+	// events (subagents, background tasks) must not revive an idle session.
+	switch {
+	case hst == "":
+	case st == "":
+		st, since = hst, hs.TS
+	case st == "busy" && (hst == "idle" || hst == "waiting"):
+		st, since = hst, hs.TS
 	}
 	return st, since
 }

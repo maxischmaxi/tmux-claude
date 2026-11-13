@@ -31,6 +31,8 @@ func TestDerive(t *testing.T) {
 		{"stop hook newer than busy", cs("busy", 10), &HookState{Event: "Stop", TS: 20, DoneAt: 20}, 0, 0, KindDone, "done"},
 		{"done but seen", cs("idle", 30), &HookState{Event: "Stop", TS: 20, DoneAt: 20}, 0, 25, KindIdle, "awaiting"},
 		{"observed transition", cs("idle", 30), nil, 30, 0, KindDone, "done"},
+		{"late hook does not revive idle", cs("idle", 10), hs("PostToolUse", "Bash", 20), 0, 0, KindIdle, "awaiting"},
+		{"interrupt without stop", cs("idle", 10), hs("UserPromptSubmit", "", 20), 0, 0, KindIdle, "awaiting"},
 		{"hook only", nil, hs("PreToolUse", "Write", 5), 0, 0, KindEdit, "editing"},
 		{"nothing", nil, nil, 0, 0, KindUnknown, "unknown"},
 	}
