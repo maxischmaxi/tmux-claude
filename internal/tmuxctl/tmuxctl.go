@@ -21,6 +21,12 @@ func tmux(args ...string) (string, error) {
 	return strings.TrimRight(string(out), "\n"), err
 }
 
+// Option returns a global tmux option, "" if unset.
+func Option(name string) string {
+	v, _ := tmux("show", "-gqv", name)
+	return v
+}
+
 func Width() int {
 	w, _ := tmux("show", "-gqv", optWidth)
 	if n, err := strconv.Atoi(w); err == nil && n >= 16 {

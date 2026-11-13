@@ -66,6 +66,7 @@ type model struct {
 	selfPane  string
 	changes   chan struct{}
 	lastFocus string
+	keys      keymap
 }
 
 func Run() error {
@@ -73,6 +74,7 @@ func Run() error {
 		col:      source.NewCollector(true),
 		selfPane: os.Getenv("TMUX_PANE"),
 		changes:  make(chan struct{}, 1),
+		keys:     loadKeys(tmuxctl.Option),
 	}
 	m.watch()
 	m.refresh()
@@ -179,30 +181,31 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.refresh()
 		return m, m.waitChange()
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "q", "ctrl+c":
+		act, n := m.keys.lookup(msg.String())
+		switch act {
+		case actClose:
 			tmuxctl.Close("")
 			return m, tea.Quit
-		case "j", "down":
+		case actDown:
 			if m.cursor < len(m.items)-1 {
 				m.cursor++
 			}
-		case "k", "up":
+		case actUp:
 			if m.cursor > 0 {
 				m.cursor--
 			}
-		case "g", "home":
+		case actTop:
 			m.cursor = 0
-		case "G", "end":
+		case actBottom:
 			m.cursor = len(m.items) - 1
-		case "enter", "l", " ":
-			m.jump(m.cursor)
-		case "r":
-			m.refresh()
-		default:
-			if s := msg.String(); len(s) == 1 && s[0] >= '1' && s[0] <= '9' {
-				m.jump(int(s[0] - '1'))
+		case actJump:
+			if n > 0 {
+				m.jump(n - 1)
+			} else {
+				m.jump(m.cursor)
 			}
+		case actRefresh:
+			m.refresh()
 		}
 	case tea.MouseMsg:
 		switch {

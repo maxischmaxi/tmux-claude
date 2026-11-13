@@ -117,6 +117,24 @@ set -g @claude-sidebar-root-key 'M-s' # toggle key without prefix (unset by defa
 set -g @claude-sidebar-width 34     # sidebar width in columns
 ```
 
+### Sidebar keys
+
+Every action takes a space separated list of keys (bubbletea key names such as `j`, `down`,
+`ctrl+n`, `enter`, `space`, `esc`). Set an action to `none` to disable it. Defaults:
+
+```tmux
+set -g @claude-sidebar-keys-down 'j down'
+set -g @claude-sidebar-keys-up 'k up'
+set -g @claude-sidebar-keys-top 'g home'
+set -g @claude-sidebar-keys-bottom 'G end'
+set -g @claude-sidebar-keys-jump 'enter l space'
+set -g @claude-sidebar-keys-refresh 'r'
+set -g @claude-sidebar-keys-close 'q ctrl+c'
+set -g @claude-sidebar-number-keys 'on'   # 1-9 jump to an entry
+```
+
+Key options are read when the sidebar opens, so toggle it once after changing them.
+
 ## How it works
 
 - **Discovery**: `~/.claude/sessions/<pid>.json` (an internal Claude Code format, parsed
